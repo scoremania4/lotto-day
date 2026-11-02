@@ -693,6 +693,7 @@ button.chip { cursor: pointer; min-height: 32px; }
 
 /* ── 광고 (한 칸, 작게) ── */
 .ad-slot { position: relative; max-height: 60px; margin-top: var(--space-xl); overflow: hidden; border-radius: var(--radius-sm); }
+.ad-spacer { height: 62px; } /* 네이티브 배너(50) + 여백 */
 .ad-tag { position: absolute; top: 0; right: 0; z-index: 1; padding: 0 6px; font-size: 10px; color: var(--ink-3); background: var(--paper); border-radius: 0 0 0 6px; }
 
 /* ── 명당 ── */
