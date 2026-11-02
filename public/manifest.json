@@ -1,0 +1,9 @@
+{
+  "name": "로또 당첨되는 날",
+  "short_name": "로또당첨",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#F6F1E7",
+  "theme_color": "#F6F1E7",
+  "description": "토요일 저녁의 작은 설렘, 내 번호를 고르고 간직하세요"
+}
