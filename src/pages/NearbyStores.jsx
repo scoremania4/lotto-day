@@ -3,7 +3,7 @@ import Icon from '../components/Icon'
 import BASE from '../data/stores.json'
 import { ALL_DRAWS } from '../data/lottoHistory'
 import { storesPath, toStore } from '../data/dhApi'
-import { formatDate } from '../utils/helpers'
+import { formatDate, formatMoney } from '../utils/helpers'
 import { dhUrl, dhInit } from '../utils/net'
 import { load, save } from '../utils/storage'
 
@@ -120,6 +120,14 @@ export default function NearbyStores({ showToast }) {
             </button>
           ))}
         </div>
+
+        {draw?.prizes?.[rank - 1] > 0 && (
+          <div className="prize-band">
+            <span className="eyebrow">{rank}등 · 한 게임 당첨금</span>
+            <strong>{formatMoney(draw.prizes[rank - 1])}</strong>
+            <span className="prize-full">{draw.prizes[rank - 1].toLocaleString()}원 · 모두 {count(rank)}게임</span>
+          </div>
+        )}
 
         <div className="chip-scroll">
           {['전체', ...regions].map(r => (

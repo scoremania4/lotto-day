@@ -733,6 +733,9 @@ button.chip { cursor: pointer; min-height: 32px; }
 .scanner-hint { position: absolute; left: var(--space-lg); right: var(--space-lg); bottom: calc(var(--space-3xl) + env(safe-area-inset-bottom, 0)); text-align: center; color: #fff; font-weight: 600; font-size: var(--fs-base); text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7); }
 
 /* ── 명당 ── */
+.prize-band { display: grid; justify-items: center; gap: 2px; margin: var(--space-xs) 0 var(--space-md); padding: var(--space-md); border-radius: var(--radius-md); background: #FFF6DD; text-align: center; }
+.prize-band strong { font-family: var(--font-display); font-size: calc(var(--fs-2xl) * 1.1); line-height: 1.2; color: var(--gold); font-weight: 400; }
+.prize-full { font-size: var(--fs-xs); color: var(--ink-3); font-variant-numeric: tabular-nums; }
 .chip-scroll { display: flex; gap: 6px; overflow-x: auto; padding: 2px 0 var(--space-xs); scrollbar-width: none; }
 .chip-scroll::-webkit-scrollbar { display: none; }
 .store-list { list-style: none; margin-top: var(--space-sm); }
