@@ -30,6 +30,14 @@ export function remove(key) {
 // ── 번호 보관함 ──
 export function saveNumbers(roundNumber, numbers, isPurchased = false) {
   const history = load('numberHistory', []);
+  // 같은 회차·같은 번호가 이미 있으면 새로 쌓지 않음 (같은 용지를 두 번 찍어도 한 줄)
+  const sorted = [...numbers].sort((a, b) => a - b);
+  const dup = history.find(h => h.roundNumber === roundNumber && h.numbers.join() === sorted.join());
+  if (dup) {
+    if (isPurchased && !dup.isPurchased) { dup.isPurchased = true; save('numberHistory', history); }
+    history.duplicate = true; // 호출한 쪽에서 "이미 있어요" 안내용
+    return history;
+  }
   history.unshift({
     id: Date.now(),
     roundNumber,

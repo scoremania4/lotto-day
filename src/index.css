@@ -696,6 +696,24 @@ button.chip { cursor: pointer; min-height: 32px; }
 .ad-spacer { height: 62px; } /* 네이티브 배너(50) + 여백 */
 .ad-tag { position: absolute; top: 0; right: 0; z-index: 1; padding: 0 6px; font-size: 10px; color: var(--ink-3); background: var(--paper); border-radius: 0 0 0 6px; }
 
+/* ── QR 스캐너 ── */
+.manual-qr { margin-top: var(--space-lg); }
+.manual-qr summary { cursor: pointer; font-size: var(--fs-sm); color: var(--ink-2); font-weight: 600; padding: var(--space-sm) 0; }
+.manual-qr .input { margin-top: var(--space-sm); }
+
+.scanner { position: fixed; inset: 0; z-index: 5000; background: #000; display: flex; align-items: center; justify-content: center; }
+.scanner-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.scanner-shade { position: absolute; inset: 0; background: radial-gradient(circle at 50% 46%, transparent 0 150px, rgba(0, 0, 0, 0.55) 152px); pointer-events: none; }
+.scanner-frame { position: relative; width: 270px; height: 270px; margin-top: -40px; pointer-events: none; }
+.scanner-frame i { position: absolute; width: 38px; height: 38px; border: 4px solid #fff; border-radius: 6px; }
+.scanner-frame i:nth-child(1) { top: 0; left: 0; border-right: 0; border-bottom: 0; }
+.scanner-frame i:nth-child(2) { top: 0; right: 0; border-left: 0; border-bottom: 0; }
+.scanner-frame i:nth-child(3) { bottom: 0; left: 0; border-right: 0; border-top: 0; }
+.scanner-frame i:nth-child(4) { bottom: 0; right: 0; border-left: 0; border-top: 0; }
+.scanner-top { position: absolute; top: calc(var(--space-lg) + env(safe-area-inset-top, 0)); right: var(--space-lg); }
+.scanner-top .icon-btn { background: rgba(0, 0, 0, 0.5); border-color: rgba(255, 255, 255, 0.3); color: #fff; }
+.scanner-hint { position: absolute; left: var(--space-lg); right: var(--space-lg); bottom: calc(var(--space-3xl) + env(safe-area-inset-bottom, 0)); text-align: center; color: #fff; font-weight: 600; font-size: var(--fs-base); text-shadow: 0 1px 6px rgba(0, 0, 0, 0.7); }
+
 /* ── 명당 ── */
 .chip-scroll { display: flex; gap: 6px; overflow-x: auto; padding: 2px 0 var(--space-xs); scrollbar-width: none; }
 .chip-scroll::-webkit-scrollbar { display: none; }
@@ -775,6 +793,14 @@ button.legend-row:active { background: var(--paper); }
 .dist-track { height: 12px; background: var(--paper); border-radius: 6px; overflow: hidden; }
 .dist-fill { height: 100%; background: var(--accent); border-radius: 6px; }
 
+.carry-chart { display: block; width: 100%; height: auto; }
+.cc-round { font: 700 14px var(--font-body); fill: var(--ink); }
+.cc-sub { font: 600 11px var(--font-body); fill: var(--ink-3); }
+.cc-sub.on { fill: var(--accent); }
+.cc-num { font: 700 13px var(--font-body); font-variant-numeric: tabular-nums; }
+.cc-plus { font: 500 16px var(--font-body); fill: var(--ink-3); }
+.cc-streak-bg { fill: var(--ink); stroke: var(--card); stroke-width: 2; }
+.cc-streak { font: 700 11px var(--font-body); fill: #fff; }
 .carry-row { padding: var(--space-md) 0; border-bottom: 1px solid var(--line); }
 .carry-row:last-child { border-bottom: none; }
 .carry-head { display: flex; align-items: center; gap: var(--space-sm); margin-bottom: 6px; font-size: var(--fs-sm); }

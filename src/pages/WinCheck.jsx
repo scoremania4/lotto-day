@@ -5,6 +5,8 @@ import Confetti from '../components/Confetti'
 import Icon from '../components/Icon'
 import { ALL_DRAWS, findDraw, getLatestResult } from '../data/lottoHistory'
 import { formatMoney, formatDate } from '../utils/helpers'
+import QrScanner from '../components/QrScanner'
+import { parseQR } from '../utils/qr'
 import { getNumberHistory, togglePurchased, deleteHistoryItem, saveNumbers } from '../utils/storage'
 
 const findRound = findDraw
@@ -17,29 +19,6 @@ function rankOf(numbers, draw) {
   return { rank, label: `${rank}등`, prize: draw.prizes[rank - 1] }
 }
 
-function parseQR(text, fallbackRound) {
-  const games = []
-  let round = fallbackRound
-  const v = text.match(/v=([0-9a-zA-Z]+)/)?.[1]
-  if (v) {
-    const r = parseInt(v.substring(0, 4), 10)
-    if (r > 0) round = r
-    v.slice(4).split(/[a-z]/i).filter(Boolean).forEach(chunk => {
-      const nums = []
-      for (let i = 0; i + 2 <= 12 && i < chunk.length; i += 2) {
-        const n = parseInt(chunk.substring(i, i + 2), 10)
-        if (n >= 1 && n <= 45) nums.push(n)
-      }
-      if (nums.length === 6) games.push(nums.sort((a, b) => a - b))
-    })
-  }
-  if (!games.length) {
-    const nums = text.match(/\b([1-9]|[1-3][0-9]|4[0-5])\b/g)
-    if (nums?.length >= 6) games.push(nums.slice(0, 6).map(Number).sort((a, b) => a - b))
-  }
-  return { round, games }
-}
-
 export default function WinCheck({ showToast }) {
   const navigate = useNavigate()
   const latest = getLatestResult()
@@ -48,6 +27,7 @@ export default function WinCheck({ showToast }) {
   const [history, setHistory] = useState(getNumberHistory())
   const [qrText, setQrText] = useState('')
   const [qrResult, setQrResult] = useState(null)
+  const [scanning, setScanning] = useState(false)
 
   const draw = findRound(selectedRound) || latest
   const refresh = () => setHistory(getNumberHistory())
@@ -60,13 +40,14 @@ export default function WinCheck({ showToast }) {
   const [showConfetti, setShowConfetti] = useState(false)
   useEffect(() => { if (bigWin) setShowConfetti(true) }, [bigWin])
 
-  const handleQR = () => {
-    const text = qrText.trim()
+  const handleQR = (raw = qrText, strict = false) => {
+    const text = raw.trim()
     if (!text) return showToast('QR 링크나 번호를 붙여넣어 주세요')
-    const res = parseQR(text, selectedRound)
-    if (!res.games.length) return showToast('번호를 찾지 못했어요. 링크를 다시 확인해 주세요')
+    const res = parseQR(text, selectedRound, strict)
+    if (!res.games.length) { showToast('로또 용지 QR이 아니에요. 다시 찍어주세요'); return false }
     if (findRound(res.round)) setSelectedRound(res.round)
     setQrResult(res)
+    return true
   }
 
 
@@ -176,22 +157,36 @@ export default function WinCheck({ showToast }) {
       {tab === 'qr' && (
         <section className="card">
           <h2 className="section-title">용지의 QR로 확인하기</h2>
-          <ol style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink-2)', paddingLeft: '1.2em', margin: 'var(--space-sm) 0 var(--space-lg)', display: 'grid', gap: 4 }}>
-            <li>휴대폰 카메라로 복권의 QR 코드를 비춰요.</li>
-            <li>나타난 링크를 길게 눌러 복사해요.</li>
-            <li>아래 칸에 붙여넣어요.</li>
-          </ol>
-          <input
-            className="input"
-            type="url"
-            inputMode="url"
-            placeholder="m.dhlottery.co.kr/qr.do?…"
-            value={qrText}
-            onChange={e => setQrText(e.target.value)}
-          />
-          <button className="btn btn-primary btn-full" style={{ marginTop: 'var(--space-sm)' }} onClick={handleQR}>
-            확인하기
+          <p className="section-subtitle">복권 위쪽의 QR 코드를 카메라로 비추면 번호를 바로 읽어와요.</p>
+          <button className="btn btn-primary btn-lg btn-full" onClick={() => setScanning(true)}>
+            <Icon name="qr" size={22} /> 카메라로 QR 찍기
           </button>
+
+          <details className="manual-qr">
+            <summary>카메라가 안 되면 링크를 붙여넣기</summary>
+            <input
+              className="input"
+              type="url"
+              inputMode="url"
+              placeholder="m.dhlottery.co.kr/?v=…"
+              value={qrText}
+              onChange={e => setQrText(e.target.value)}
+            />
+            <button className="btn btn-secondary btn-full" style={{ marginTop: 'var(--space-sm)' }} onClick={() => handleQR()}>
+              확인하기
+            </button>
+          </details>
+
+          {scanning && (
+            <QrScanner
+              onClose={() => setScanning(false)}
+              onScan={(text) => {
+                if (handleQR(text, true) === false) return false // 용지 QR이 아니면 계속 찍게 둠
+                setScanning(false)
+                return true
+              }}
+            />
+          )}
 
           {qrResult && (
             <div style={{ marginTop: 'var(--space-xl)' }}>
@@ -216,10 +211,13 @@ export default function WinCheck({ showToast }) {
               <button
                 className="btn btn-secondary btn-full"
                 onClick={() => {
-                  qrResult.games.forEach(g => saveNumbers(qrResult.round, g, true))
+                  const added = qrResult.games.filter(g => !saveNumbers(qrResult.round, g, true).duplicate).length
+                  const skipped = qrResult.games.length - added
                   refresh()
                   setTab('saved')
-                  showToast('산 번호로 보관함에 담았어요')
+                  showToast(added
+                    ? `${added}줄을 산 번호로 담았어요${skipped ? ` (이미 있는 ${skipped}줄은 건너뛰었어요)` : ''}`
+                    : '이미 보관함에 있는 번호예요')
                 }}
               >
                 <Icon name="bookmark" size={19} /> {qrResult.games.length}줄 모두 보관함에 담기

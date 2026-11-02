@@ -148,7 +148,8 @@ function CarryView() {
   const [withBonus, setWithBonus] = useState(true)
   const [shown, setShown] = useState(PAGE)
   const summary = useMemo(() => carrySummary(withBonus), [withBonus])
-  const rows = useMemo(() => ALL_DRAWS.slice(-shown).reverse(), [shown])
+  // 맨 아래 회차에서 이어지는 선까지 그리려면 한 회차 더 필요
+  const rows = useMemo(() => ALL_DRAWS.slice(-(shown + 1)).reverse(), [shown])
   const labels = ['없음', '1개', '2개', '3개 이상']
 
   return (
@@ -202,26 +203,9 @@ function CarryView() {
       </section>
 
       <h2 className="section-title" style={{ margin: 'var(--space-xl) 0 var(--space-sm)' }}>회차별 이월</h2>
-      <p className="section-subtitle">색이 찬 공이 지난 회차에서 넘어온 번호예요. 작은 숫자는 몇 회째 이어졌는지예요.</p>
-      <div className="card" style={{ padding: 'var(--space-sm) var(--space-md)' }}>
-        {rows.map(d => {
-          const carried = carriedFrom(d, withBonus)
-          return (
-            <div key={d.round} className="carry-row">
-              <div className="carry-head">
-                <strong>{d.round}회</strong>
-                {carried.length > 0
-                  ? <span className="chip chip-accent" style={{ padding: '1px 8px' }}>이월 {carried.length}</span>
-                  : <span className="eyebrow">이월 없음</span>}
-              </div>
-              <div className="ball-row nowrap" style={{ gap: 4 }}>
-                {d.numbers.map(n => <CarryBall key={n} n={n} round={d.round} carried={carried} withBonus={withBonus} />)}
-                <span className="ball-divider" style={{ margin: 0 }}>+</span>
-                <CarryBall n={d.bonus} round={d.round} carried={withBonus ? carried : []} withBonus={withBonus} bonus />
-              </div>
-            </div>
-          )
-        })}
+      <p className="section-subtitle">지난 회차에서 넘어온 번호는 색이 찬 공이고, 선으로 이어져 있어요. 선 위의 숫자는 몇 회째 이어졌는지예요.</p>
+      <div className="card" style={{ padding: 'var(--space-sm)' }}>
+        <CarryChart rows={rows} withBonus={withBonus} />
       </div>
       {shown < ALL_DRAWS.length && (
         <button className="btn btn-secondary btn-full" style={{ marginTop: 'var(--space-md)' }} onClick={() => setShown(s => s + PAGE * 2)}>
@@ -232,12 +216,87 @@ function CarryView() {
   )
 }
 
-function CarryBall({ n, round, carried, withBonus, bonus }) {
-  const hit = carried.includes(n)
+// 회차 한 줄 = 공 6개 + 보너스. 위가 최신, 아래로 갈수록 과거
+const ROW_H = 76, BALL_R = 14, LABEL_W = 50
+const SLOT_X = [...Array.from({ length: 6 }, (_, i) => LABEL_W + 22 + i * 40), LABEL_W + 22 + 5 * 40 + 52] // 마지막 = 보너스
+const PLUS_X = LABEL_W + 22 + 5 * 40 + 26
+const CHART_W = SLOT_X[6] + BALL_R + 10
+const BALL_VAR = ['--ball-1', '--ball-2', '--ball-3', '--ball-4', '--ball-5']
+const ballVar = (n) => `var(${BALL_VAR[n <= 10 ? 0 : n <= 20 ? 1 : n <= 30 ? 2 : n <= 40 ? 3 : 4]})`
+
+// 한 회차에서 번호 n 의 칸 번호 (없으면 -1). 보너스는 6번 칸
+function slotOf(d, n, withBonus) {
+  const i = d.numbers.indexOf(n)
+  if (i >= 0) return i
+  return withBonus && d.bonus === n ? 6 : -1
+}
+
+function CarryChart({ rows, withBonus }) {
+  const H = rows.length * ROW_H
+  const cy = (r) => r * ROW_H + ROW_H / 2
+  const links = []
+  const labels = {}
+  rows.forEach((d, r) => {
+    const older = rows[r + 1]
+    if (!older) return
+    carriedFrom(d, withBonus).forEach(n => {
+      const a = slotOf(d, n, withBonus), b = slotOf(older, n, withBonus)
+      if (a >= 0 && b >= 0) links.push({ n, r, a, b, streak: carryStreak(n, d.round, withBonus) })
+    })
+  })
+
   return (
-    <span className="hit-wrap">
-      <LottoBall number={n} size="sm" ring={!hit} bonus={bonus} />
-      {hit && <span className="streak-mark">{carryStreak(n, round, withBonus)}</span>}
-    </span>
+    <svg viewBox={`0 0 ${CHART_W} ${H}`} className="carry-chart" role="img" aria-label="회차별 이월수 연결도">
+      {/* 선 먼저 (공 뒤에 깔림) */}
+      {links.map(({ n, r, a, b, streak }) => {
+        const x1 = SLOT_X[a], y1 = cy(r) + BALL_R, x2 = SLOT_X[b], y2 = cy(r + 1) - BALL_R
+        return <line key={`${r}-${n}`} x1={x1} y1={y1} x2={x2} y2={y2} stroke={ballVar(n)} strokeWidth={3} strokeLinecap="round" opacity={0.85} />
+      })}
+
+      {rows.map((d, r) => {
+        const carried = carriedFrom(d, withBonus)
+        const cnt = r < rows.length - 1 ? carried.length : null
+        return (
+          <g key={d.round}>
+            <text x={4} y={cy(r) - 2} className="cc-round">{d.round}회</text>
+            <text x={4} y={cy(r) + 14} className={`cc-sub${cnt ? ' on' : ''}`}>{cnt == null ? '' : cnt ? `이월 ${cnt}` : '이월 없음'}</text>
+            {d.numbers.map((n, i) => <ChartBall key={n} n={n} x={SLOT_X[i]} y={cy(r)} on={carried.includes(n)} />)}
+            <text x={PLUS_X} y={cy(r) + 6} textAnchor="middle" className="cc-plus">+</text>
+            <ChartBall n={d.bonus} x={SLOT_X[6]} y={cy(r)} on={withBonus && carried.includes(d.bonus)} bonus />
+          </g>
+        )
+      })}
+
+      {/* 몇 회째 이어졌는지: 선 위 작은 표시 (다른 표시와 겹치면 선을 따라 비켜 놓음) */}
+      {links.map((l) => {
+        const placed = labels[l.r] ??= []
+        const x1 = SLOT_X[l.a], x2 = SLOT_X[l.b], y1 = cy(l.r) + BALL_R, y2 = cy(l.r + 1) - BALL_R
+        let pt
+        for (const t of [0.5, 0.32, 0.68, 0.2, 0.8]) {
+          pt = { x: x1 + (x2 - x1) * t, y: y1 + (y2 - y1) * t }
+          if (placed.every(q => Math.hypot(q.x - pt.x, q.y - pt.y) >= 22)) break
+        }
+        placed.push(pt)
+        const { r, n, streak } = l
+        const mx = pt.x, my = pt.y
+        return (
+          <g key={`s${r}-${n}`}>
+            <circle cx={mx} cy={my} r={9} className="cc-streak-bg" />
+            <text x={mx} y={my + 4} textAnchor="middle" className="cc-streak">{streak}</text>
+          </g>
+        )
+      })}
+    </svg>
+  )
+}
+
+function ChartBall({ n, x, y, on, bonus }) {
+  const c = ballVar(n)
+  return (
+    <g>
+      <circle cx={x} cy={y} r={BALL_R} fill={on ? c : 'var(--card)'} stroke={c} strokeWidth={2} />
+      {bonus && <circle cx={x} cy={y} r={BALL_R + 3.5} fill="none" stroke="var(--ink-3)" strokeWidth={1.4} strokeDasharray="3 2.5" />}
+      <text x={x} y={y + 5} textAnchor="middle" className="cc-num" style={{ fill: on ? (n <= 10 ? '#4A3200' : '#fff') : c }}>{n}</text>
+    </g>
   )
 }
