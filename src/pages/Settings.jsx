@@ -81,6 +81,16 @@ export default function Settings() {
         </button>
       </section>
 
+      <section className="card">
+        <h2 className="section-title">앱 정보</h2>
+        <p className="section-subtitle" style={{ marginBottom: 'var(--space-md)' }}>
+          동행복권과 무관한 비공식 앱이에요. 복권을 판매하지 않고, 당첨 번호와 판매점 정보만 보여드려요. 복권은 만 19세 이상만 살 수 있어요.
+        </p>
+        <a className="btn btn-secondary btn-full" href="https://scoremania4.github.io/lotto-day/privacy.html" target="_blank" rel="noopener noreferrer">
+          개인정보처리방침 <Icon name="external" size={18} />
+        </a>
+      </section>
+
       <p className="footnote">
         로또 당첨되는 날 · 내 번호는 이 기기에만 저장돼요.
       </p>

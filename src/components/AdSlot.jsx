@@ -12,6 +12,7 @@ const SLOT = import.meta.env.VITE_ADSENSE_SLOT
 const HEIGHT = 50
 
 export default function AdSlot() {
+  if (import.meta.env.VITE_NO_ADS) return null // 스토어 스크린샷 촬영용
   return Capacitor.isNativePlatform() ? <NativeBanner /> : <WebAd />
 }
 

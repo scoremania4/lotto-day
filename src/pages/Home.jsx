@@ -133,7 +133,8 @@ export default function Home() {
 
       <p className="footnote">
         로또는 매 회 새로 추첨돼요.<br />
-        추천 번호는 재미로, 구매는 적당히 즐겨주세요.
+        추천 번호는 재미로, 구매는 적당히 즐겨주세요.<br />
+        동행복권과 무관한 비공식 앱이며 복권을 판매하지 않아요.
       </p>
 
       <AdSlot />
