@@ -39,7 +39,10 @@ export default function Home() {
       <header className="page-header">
         <div>
           <div className="eyebrow">토요일 저녁의 작은 설렘</div>
-          <h1 className="page-title">로또 당첨되는 날</h1>
+          <h1 className="page-title brand">
+            <span className="brand-mark"><Icon name="clover" size={26} strokeWidth={2} /></span>
+            로또 당첨되는 날
+          </h1>
         </div>
         <button className="icon-btn" onClick={() => navigate('/settings')} aria-label="설정">
           <Icon name="sliders" />

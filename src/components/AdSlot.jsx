@@ -22,6 +22,7 @@ function NativeBanner() {
   useEffect(() => {
     let alive = true
     let AdMob
+    document.documentElement.style.setProperty('--ad-h', '62px') // 알림 창이 배너 뒤에 가리지 않게 위로 올림
     ;(async () => {
       try {
         ;({ AdMob } = await import('@capacitor-community/admob'))
@@ -37,7 +38,11 @@ function NativeBanner() {
         })
       } catch { /* 광고를 못 불러와도 앱은 그대로 */ }
     })()
-    return () => { alive = false; AdMob?.removeBanner().catch(() => {}) }
+    return () => {
+      alive = false
+      document.documentElement.style.removeProperty('--ad-h')
+      AdMob?.removeBanner().catch(() => {})
+    }
   }, [])
 
   return <div ref={spacer} className="ad-spacer" aria-hidden="true" />

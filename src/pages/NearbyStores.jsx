@@ -4,6 +4,7 @@ import BASE from '../data/stores.json'
 import { ALL_DRAWS } from '../data/lottoHistory'
 import { storesPath, toStore } from '../data/dhApi'
 import { formatDate } from '../utils/helpers'
+import { dhUrl, dhInit } from '../utils/net'
 import { load, save } from '../utils/storage'
 
 const naverSearch = (q, pos) => {
@@ -27,8 +28,11 @@ function useStores(round) {
   useEffect(() => {
     if (cached) return
     let alive = true
-    fetch(`/api/dh${storesPath(round)}`)
-      .then(r => (r.ok && (r.headers.get('content-type') || '').includes('json') ? r.json() : Promise.reject()))
+    const url = dhUrl(storesPath(round))
+    // 웹 배포는 브라우저 제한으로 직접 못 부름 → 빌드 때 저장해 둔 판매점을 보여줌
+    if (!url) { setState({ list: BASE.list, round: BASE.round, loading: false }); return () => {} }
+    fetch(url, dhInit())
+      .then(r => (r.ok ? r.json() : Promise.reject()))
       .then(j => {
         const list = (j?.data?.list ?? []).map(toStore)
         if (!list.length) throw new Error('empty')
