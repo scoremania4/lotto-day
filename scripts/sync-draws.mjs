@@ -6,10 +6,19 @@ import { DH_ORIGIN, DH_HEADERS, drawsPath, storesPath, toDrawRow, isValidRow, to
 const DRAWS = new URL('../src/data/draws.json', import.meta.url)
 const STORES = new URL('../src/data/stores.json', import.meta.url)
 
-async function getJson(path) {
-  const res = await fetch(DH_ORIGIN + path, { headers: { ...DH_HEADERS, 'User-Agent': 'Mozilla/5.0' } })
-  if (!res.ok || !(res.headers.get('content-type') || '').includes('json')) throw new Error(`${res.status} ${path}`)
-  return res.json()
+// 일시적인 네트워크 오류는 최대 4번까지 다시 시도 (5초 간격)
+async function getJson(path, tries = 4) {
+  for (let i = 1; ; i++) {
+    try {
+      const res = await fetch(DH_ORIGIN + path, { headers: { ...DH_HEADERS, 'User-Agent': 'Mozilla/5.0' } })
+      if (!res.ok || !(res.headers.get('content-type') || '').includes('json')) throw new Error(`${res.status} ${path}`)
+      return await res.json()
+    } catch (e) {
+      if (i >= tries) throw e
+      console.error(`재시도 ${i}/${tries - 1}: ${e.message}`)
+      await new Promise(r => setTimeout(r, 5000))
+    }
+  }
 }
 
 try {
