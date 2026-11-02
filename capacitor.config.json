@@ -1,0 +1,9 @@
+{
+  "appId": "com.lottoday.app",
+  "appName": "로또 당첨되는 날",
+  "webDir": "dist",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#F6F1E7"
+  }
+}

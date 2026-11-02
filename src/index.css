@@ -120,6 +120,18 @@ body {
 
 button, input, select { font-family: inherit; color: inherit; }
 
+/* iOS 상태 표시줄(시계·배터리) 뒤로 스크롤 내용이 비치지 않게 가림 */
+#root::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: env(safe-area-inset-top, 0);
+  background: var(--paper);
+  z-index: 3500;
+}
+
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-thumb { background: var(--line-strong); border-radius: var(--radius-full); }
 

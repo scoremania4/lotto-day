@@ -8,14 +8,18 @@
     "build": "vite build",
     "preview": "vite preview",
     "sync": "node scripts/sync-draws.mjs",
-    "prebuild": "node scripts/sync-draws.mjs"
+    "prebuild": "node scripts/sync-draws.mjs",
+    "ios": "npm run build && cap sync ios && cap open ios"
   },
   "dependencies": {
+    "@capacitor/core": "^8.6.0",
+    "@capacitor/ios": "^8.6.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
     "react-router-dom": "^7.18.4"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.6.0",
     "@vitejs/plugin-react": "^6.1.2",
     "vite": "^8.3.5"
   }
