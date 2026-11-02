@@ -1,6 +1,6 @@
-/* 매주 토요일 20:55 새 회차 자동 반영
+/* 매주 토요일 20:55 새 회차 자동 반영 (추첨 20:35, 번호 공개 20:50쯤)
    - 앱을 켤 때 놓친 회차가 있으면 바로 받아옴
-   - 발표가 늦으면 5분 간격으로 2시간까지 다시 시도
+   - 발표가 늦으면 5분 간격으로 3시간까지 다시 시도
    - 기기 시간이 한국 시간이라고 가정 */
 import { ALL_DRAWS, addDraws } from '../data/lottoHistory'
 import { drawsPath, toDrawRow, isValidRow } from '../data/dhApi'
@@ -9,7 +9,7 @@ import { dhUrl, dhInit, PUBLISHED_DRAWS } from './net'
 const WEEK = 7 * 24 * 60 * 60 * 1000
 const FIRST_UPDATE = new Date(2002, 11, 7, 20, 55) // 1회 추첨일 20:55
 const RETRY_MS = 5 * 60 * 1000
-const MAX_RETRY = 24
+const MAX_RETRY = 36
 
 // 지금 시점에 나와 있어야 할 최신 회차
 export const expectedLatest = (now = new Date()) => Math.floor((now - FIRST_UPDATE) / WEEK) + 1

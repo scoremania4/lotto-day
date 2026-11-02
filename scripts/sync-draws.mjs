@@ -31,8 +31,11 @@ try {
 
   const round = rows.length
   const list = ((await getJson(storesPath(round)))?.data?.list ?? []).map(toStore)
-  writeFileSync(STORES, JSON.stringify({ round, list }) + '\n')
-  console.log(`제 ${round}회 당첨 판매점 ${list.length}곳 저장`)
+  // 판매점 집계(21:15쯤)가 끝나기 전이면 비어 있음 → 지난 회차 데이터를 비운 채로 덮어쓰지 않음
+  if (list.length || !existsSync(STORES)) {
+    writeFileSync(STORES, JSON.stringify({ round, list }) + '\n')
+    console.log(`제 ${round}회 당첨 판매점 ${list.length}곳 저장`)
+  } else console.log(`제 ${round}회 당첨 판매점 아직 집계 전 — 이전 판매점 데이터 유지`)
 } catch (e) {
   console.error(`동기화 실패: ${e.message} — 기존 데이터를 유지합니다`)
   // 배포(CI)에서는 낡은 데이터로 조용히 배포하지 않고 실패로 알림
