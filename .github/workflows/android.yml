@@ -1,6 +1,6 @@
 # 안드로이드 앱 번들(.aab, Play 업로드용)과 설치용 .apk 만들기 — 직접 실행(Actions > android > Run workflow)
 # 필요한 Secrets: ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD
-# 선택 Secrets : ADMOB_APP_ID_ANDROID(AdMob 안드로이드 앱 ID), ADMOB_BANNER_ID_ANDROID(배너 광고 단위 ID) — 없으면 구글 테스트 광고
+# 광고: AdMob 안드로이드 앱 ID / 배너 광고 단위 ID 는 공개 값이라 아래 env 에 직접 둠 (test_ads 를 켜면 구글 테스트 광고)
 name: android
 
 on:
@@ -10,6 +10,10 @@ on:
         description: 'versionCode (Play에 올릴 때마다 1씩 올려야 함)'
         required: true
         default: '1'
+      test_ads:
+        description: '테스트 광고로 만들기 (내 폰에서 눌러 볼 때. Play 배포용은 끄기)'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -31,7 +35,7 @@ jobs:
       - run: npm run build # 빌드 전에 최신 당첨 데이터를 자동으로 받음
         env:
           CI: 'true'
-          VITE_ADMOB_BANNER_ID_ANDROID: ${{ secrets.ADMOB_BANNER_ID_ANDROID }}
+          VITE_ADMOB_BANNER_ID_ANDROID: ${{ inputs.test_ads == false && 'ca-app-pub-4585942709213819/4053413073' || '' }}
       - run: npx cap sync android
       - name: 서명 키 풀기
         run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/upload.jks"
@@ -40,7 +44,7 @@ jobs:
         run: ./gradlew bundleRelease assembleRelease --no-daemon
         env:
           VERSION_CODE: ${{ inputs.version_code }}
-          ADMOB_APP_ID: ${{ secrets.ADMOB_APP_ID_ANDROID }}
+          ADMOB_APP_ID: ${{ inputs.test_ads && 'ca-app-pub-3940256099942544~3347511713' || 'ca-app-pub-4585942709213819~4019634389' }}
           KEYSTORE_PATH: ${{ runner.temp }}/upload.jks
           KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
