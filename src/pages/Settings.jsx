@@ -89,6 +89,9 @@ export default function Settings() {
         <a className="btn btn-secondary btn-full" href="https://scoremania4.github.io/lotto-day/privacy.html" target="_blank" rel="noopener noreferrer">
           개인정보처리방침 <Icon name="external" size={18} />
         </a>
+        <a className="btn btn-secondary btn-full" style={{ marginTop: 'var(--space-sm)' }} href="mailto:scoremania4@gmail.com">
+          개발자에게 문의하기 <Icon name="envelope" size={18} />
+        </a>
       </section>
 
       <p className="footnote">

@@ -5,7 +5,7 @@
 - **부제** (30자): 이월수·패턴 분석과 당첨 확인
 - **카테고리**: 라이프스타일 (보조: 유틸리티)
 - **가격**: 무료
-- **지원 URL**: https://github.com/scoremania4/lotto-day/issues
+- **지원 URL**: https://scoremania4.github.io/lotto-day/support.html (문의 메일 scoremania4@gmail.com)
 - **개인정보처리방침 URL**: https://scoremania4.github.io/lotto-day/privacy.html
 - **저작권**: 2026 SUNGBOG LEE
 
