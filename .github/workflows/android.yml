@@ -1,4 +1,4 @@
-# 안드로이드 앱 번들(.aab) 만들기 — 직접 실행(Actions > android > Run workflow)
+# 안드로이드 앱 번들(.aab, Play 업로드용)과 설치용 .apk 만들기 — 직접 실행(Actions > android > Run workflow)
 # 필요한 Secrets: ANDROID_KEYSTORE_BASE64, ANDROID_KEYSTORE_PASSWORD, ANDROID_KEY_ALIAS, ANDROID_KEY_PASSWORD
 # 선택 Secrets : ADMOB_APP_ID_ANDROID(AdMob 안드로이드 앱 ID), ADMOB_BANNER_ID_ANDROID(배너 광고 단위 ID) — 없으면 구글 테스트 광고
 name: android
@@ -37,7 +37,7 @@ jobs:
         run: echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 -d > "$RUNNER_TEMP/upload.jks"
       - name: 번들 만들기
         working-directory: android
-        run: ./gradlew bundleRelease --no-daemon
+        run: ./gradlew bundleRelease assembleRelease --no-daemon
         env:
           VERSION_CODE: ${{ inputs.version_code }}
           ADMOB_APP_ID: ${{ secrets.ADMOB_APP_ID_ANDROID }}
@@ -47,6 +47,8 @@ jobs:
           KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
       - uses: actions/upload-artifact@v4
         with:
-          name: lotto-day-release-aab
-          path: android/app/build/outputs/bundle/release/*.aab
+          name: lotto-day-android
+          path: |
+            android/app/build/outputs/bundle/release/*.aab
+            android/app/build/outputs/apk/release/*.apk
           retention-days: 7
